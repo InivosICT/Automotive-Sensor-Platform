@@ -1,0 +1,16 @@
+{
+  "vehicleId": "vehicle-001",
+  "ecuSocketPath": "/tmp/ecu_processor.sock",
+  "sensors": [
+    {
+      "id": "temp_1",
+      "type": "temperature",
+      "periodSec": 1
+    },
+    {
+      "id": "speed_1",
+      "type": "speed",
+      "periodSec": 2
+    }
+  ]
+}
