@@ -1,5 +1,5 @@
-#include "sensor_simulator/include/SensorData.hpp";
-#include "sensor_simulator/include/sensors/ClimateSensor.hpp";
+#include "SensorData.hpp"
+#include "sensors/ClimateSensor.hpp"
 
 SensorData ClimateSensor::sample() const {
     return {

@@ -1,5 +1,5 @@
-#include "sensor_simulator/include/SensorData.hpp";
-#include "sensor_simulator/include/sensors/SpeedometerSensor.hpp";
+#include "SensorData.hpp"
+#include "sensors/SpeedometerSensor.hpp"
 
 SensorData SpeedometerSensor::sample() const {
     return {

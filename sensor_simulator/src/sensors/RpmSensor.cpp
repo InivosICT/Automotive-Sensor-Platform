@@ -1,5 +1,5 @@
-#include "sensor_simulator/include/SensorData.hpp";
-#include "sensor_simulator/include/sensors/RpmSensor.hpp";
+#include "SensorData.hpp"
+#include "sensors/RpmSensor.hpp"
 
 SensorData RpmSensor::sample() const {
     return {

@@ -1,6 +1,8 @@
+#pragma once
+
 #include <memory>
-#include "sensor_simulator/include/ISensor.hpp";
-#include "sensor_simulator/include/SensorConfig.hpp";
+#include "ISensor.hpp"
+#include "SensorConfig.hpp"
 
 class SensorFactory {
     public:
