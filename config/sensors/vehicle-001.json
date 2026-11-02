@@ -4,13 +4,13 @@
   "sensors": [
     {
       "id": "temp_1",
-      "type": "temperature",
-      "periodSec": 1
+      "type": "Climate",
+      "periodSec": 2
     },
     {
       "id": "speed_1",
-      "type": "speed",
-      "periodSec": 2
+      "type": "Speedometer",
+      "periodSec": 10
     }
   ]
 }
