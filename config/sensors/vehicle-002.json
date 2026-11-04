@@ -1,0 +1,13 @@
+{
+  "vehicleId": "vehicle-002",
+  "ecuSocketPath": "/tmp/ecu_processor.sock",
+  "sensors": [
+    {
+      "id": "RPM_1",
+      "type": "RPM",
+      "periodSec": 1,
+      "minValue": 0.0,
+      "maxValue": 8000.0
+    }
+  ]
+}

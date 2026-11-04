@@ -1,11 +1,12 @@
 #include "SensorData.hpp"
 #include "sensors/SpeedometerSensor.hpp"
 
-SensorData SpeedometerSensor::sample() const {
+SensorData SpeedometerSensor::sample() {
     return {
-        "001",
-        "speedometer",
-        50.02,
-        12500
+        config_.vehicleId,
+        config_.id,
+        config_.type,
+        generateValue(),
+        currentTimeMs()
     };
 }

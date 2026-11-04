@@ -3,7 +3,10 @@
 #include <string>
 
 struct SensorConfig {
+    std::string vehicleId;
     std::string id;
     std::string type;
-    int periodSec;
+    int periodSec{};
+    double minValue{};
+    double maxValue{};
 };

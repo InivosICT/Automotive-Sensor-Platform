@@ -1,11 +1,12 @@
 #include "SensorData.hpp"
 #include "sensors/ClimateSensor.hpp"
 
-SensorData ClimateSensor::sample() const {
+SensorData ClimateSensor::sample() {
     return {
-        "001",
-        "temperature",
-        50.02,
-        12500
+       config_.vehicleId,
+       config_.id,
+        config_.type,
+        generateValue(),
+        currentTimeMs()
     };
 }
