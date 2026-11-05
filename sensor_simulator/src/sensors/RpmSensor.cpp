@@ -1,11 +1,12 @@
 #include "SensorData.hpp"
 #include "sensors/RpmSensor.hpp"
 
-SensorData RpmSensor::sample() const {
+SensorData RpmSensor::sample() {
     return {
-        "001",
-        "rpm",
-        50.02,
-        12500
+        config_.vehicleId,
+        config_.id,
+        config_.type,
+        generateValue(),
+        currentTimeMs()
     };
 }

@@ -1,8 +1,10 @@
 #pragma once
 
-#include "ISensor.hpp"
-class ClimateSensor : public ISensor {
+#include "BaseSensor.hpp"
+
+class ClimateSensor : public BaseSensor {
     public:
-        SensorData sample() const override;
+        using BaseSensor::BaseSensor;
+        SensorData sample() override;
 
 };

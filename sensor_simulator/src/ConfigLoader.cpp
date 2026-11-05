@@ -38,9 +38,12 @@ SimulatorConfig ConfigLoader::load(const std::filesystem::path& configPath) {
     }
 
         SensorConfig sensorConfig;
+        sensorConfig.vehicleId = config.vehicleId;
         sensorConfig.id = sensorJson["id"].GetString();
         sensorConfig.type = sensorJson["type"].GetString();
         sensorConfig.periodSec = sensorJson["periodSec"].GetInt();
+        sensorConfig.minValue = sensorJson["minValue"].GetDouble();
+        sensorConfig.maxValue = sensorJson["maxValue"].GetDouble();
 
         config.sensors.push_back(sensorConfig);
     }

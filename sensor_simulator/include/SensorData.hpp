@@ -4,7 +4,8 @@
 #include <cstdint>
 
 struct SensorData
-{
+{   
+    std::string vehicleId;
     std::string sensorId;
     std::string sensorType;
     double value{};

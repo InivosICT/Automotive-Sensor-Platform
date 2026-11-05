@@ -1,7 +1,9 @@
 #pragma once
 
-#include "ISensor.hpp"
-class SpeedometerSensor : public ISensor {
+#include "BaseSensor.hpp"
+
+class SpeedometerSensor : public BaseSensor {
     public:
-        SensorData sample() const override;
+        using BaseSensor::BaseSensor;
+        SensorData sample() override;
 };

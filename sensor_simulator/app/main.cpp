@@ -1,6 +1,8 @@
 #include "SensorFactory.hpp"
 #include "CommandLineParser.hpp"
 #include "ConfigLoader.hpp"
+#include "PayloadBuilder.hpp"
+#include "UnixSocketClient.hpp"
 
 #include <iostream>
 #include <atomic>
@@ -30,35 +32,40 @@ int main(int argc, char* argv[]) {
             
             std::unique_ptr<ISensor> sensor = SensorFactory::create(sensorConfig);
 
-             sensorThreads.emplace_back( [sensor = std::move(sensor), sensorConfig, &running, &outputMutex]() mutable
+             sensorThreads.emplace_back( [sensor = std::move(sensor), sensorConfig, socketPath = config.ecuSocketPath, &running, &outputMutex]() mutable
                 {
-        //              PayloadBuilder payloadBuilder;
+                    PayloadBuilder payloadBuilder;
+                    UnixSocketClient socketClient{
+                        socketPath
+                    };
 
-        // UnixSocketClient socketClient{
-        //     socketPath
-        // };
+                if (!socketClient.connect()) {
+                    std::lock_guard<std::mutex> lock{outputMutex};
 
-        // if (!socketClient.connect()) {
-        //     std::lock_guard<std::mutex> lock{
-        //         outputMutex
-        //     };
+                    std::cerr << "Failed to connect sensor "<< sensorConfig.id << " to " << socketPath << '\n';
 
-        //     std::cerr
-        //         << "Failed to connect sensor "
-        //         << sensorConfig.id
-        //         << " to "
-        //         << socketPath
-        //         << '\n';
+                    return;
+                }
 
-        //     return;}
-                    while (running.load())
+                while (running.load())
                     {
                         const SensorData data = sensor->sample();
+
+                        const std::string payload =payloadBuilder.build(data);
+
+                         if (!socketClient.sendMessage(payload)){
+            
+                            std::lock_guard<std::mutex> lock{outputMutex};
+
+                            std::cerr << "Failed to send payload from "<< sensorConfig.id << '\n';
+
+                            break;
+        }
 
                         {
                             std::lock_guard<std::mutex> lock{outputMutex};
 
-                            std::cout<< "Sensor ID: "<< data.sensorId<< ", type: "<< data.sensorType<< ", value: "<< data.value<< ", timestamp: "<< data.timestampMs<< '\n';
+                            std::cout<<"Vehicle ID: "<< sensorConfig.vehicleId << ", Sensor ID: "<< data.sensorId<< ", type: "<< data.sensorType<< ", value: "<< data.value<< ", timestamp: "<< data.timestampMs<< '\n';
                         }
 
                         std::this_thread::sleep_for(std::chrono::seconds{sensorConfig.periodSec});

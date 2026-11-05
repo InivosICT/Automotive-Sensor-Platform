@@ -6,5 +6,5 @@ class ISensor {
     public:
         
         virtual ~ISensor() = default;
-        virtual SensorData sample() const = 0;
+        virtual SensorData sample() = 0;
 };
