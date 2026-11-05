@@ -1,4 +1,5 @@
 #include "ECUServer.hpp"
+#include "Logger.hpp"
 
 #include <rapidjson/document.h>
 
@@ -185,6 +186,12 @@ void ECUServer::handleClient(
             << ", Timestamp: "
             << timestamp
             << '\n';
+        Logger::instance().info(
+            "Vehicle ID: " + std::string(document["vehicleId"].GetString()) +
+            ", Sensor ID: " + sensorId +
+            ", Type: " + sensorType +
+            ", Value: " + std::to_string(value) +
+            ", Timestamp: " + std::to_string(timestamp));
     }
 
     ::close(clientFd);

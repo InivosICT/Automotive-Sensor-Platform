@@ -1,6 +1,34 @@
 cmake_minimum_required(VERSION 3.16)
 
-project(SensorSimulator LANGUAGES CXX)
+project(AutomotiveSensorPlatform LANGUAGES CXX)
+
+find_package(Threads REQUIRED)
+
+add_library(logger SHARED 
+    shared/logger/Logger.cpp)
+
+target_include_directories(logger
+    PUBLIC
+        ${CMAKE_CURRENT_SOURCE_DIR}/shared/logger/include
+)
+
+target_compile_features(logger
+    PUBLIC
+        cxx_std_17
+)
+
+target_link_libraries(logger
+    PUBLIC
+        Threads::Threads
+)
+
+target_compile_options(logger
+    PRIVATE
+        -Wall
+        -Wextra
+        -Wpedantic
+)
+
 
 add_executable(sensor_simulator
     sensor_simulator/app/main.cpp
@@ -15,21 +43,36 @@ add_executable(sensor_simulator
     sensor_simulator/src/sensors/ClimateSensor.cpp
 )
 
+add_executable(ecu_processor
+    ECU/app/processor.cpp
+    ECU/ECUServer.cpp)
+
+
+
 target_include_directories(sensor_simulator
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/sensor_simulator/include
         ${CMAKE_CURRENT_SOURCE_DIR}/third_party/rapidjson/include
 )
 
-add_executable(ecu_processor
-    ECU/app/processor.cpp
-    ECU/ECUServer.cpp)
-
 target_include_directories(ecu_processor
     PRIVATE
          ${CMAKE_CURRENT_SOURCE_DIR}/ECU
          ${CMAKE_CURRENT_SOURCE_DIR}/third_party/rapidjson/include
 )
+
+target_link_libraries(sensor_simulator
+    PRIVATE
+        logger
+        )
+
+target_link_libraries(ecu_processor
+    PRIVATE
+        logger
+)
+
+
+
 
 target_compile_features(sensor_simulator
     PRIVATE
