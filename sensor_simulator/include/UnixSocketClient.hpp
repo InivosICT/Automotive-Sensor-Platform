@@ -3,6 +3,7 @@
 #include <cstddef>
 #include <string>
 #include <string_view>
+#include <chrono>
 
 class UnixSocketClient
 {
@@ -22,7 +23,10 @@ public:
 
 private:
     bool sendAll(const void* data,std::size_t size);
-
     std::string m_socketPath;
     int m_socketFd{-1};
+
+    std::chrono::steady_clock::time_point m_nextReconnectAttempt{};
+
+    static constexpr auto ReconnectInterval = std::chrono::seconds{2};
 };

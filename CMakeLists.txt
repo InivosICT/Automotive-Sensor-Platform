@@ -45,7 +45,11 @@ add_executable(sensor_simulator
 
 add_executable(ecu_processor
     ECU/app/processor.cpp
-    ECU/ECUServer.cpp)
+    ECU/ECUServer.cpp
+    ECU/SingleInstanceGuard.cpp
+    ECU/InternalStateMap.cpp
+    ECU/DiagnosticModule.cpp
+    ECU/ActuatorProxy.cpp)
 
 
 
@@ -53,12 +57,15 @@ target_include_directories(sensor_simulator
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/sensor_simulator/include
         ${CMAKE_CURRENT_SOURCE_DIR}/third_party/rapidjson/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/shared/data/include
 )
 
 target_include_directories(ecu_processor
     PRIVATE
-         ${CMAKE_CURRENT_SOURCE_DIR}/ECU
+         ${CMAKE_CURRENT_SOURCE_DIR}/ECU/include
          ${CMAKE_CURRENT_SOURCE_DIR}/third_party/rapidjson/include
+         ${CMAKE_CURRENT_SOURCE_DIR}/shared/data/include
+
 )
 
 target_link_libraries(sensor_simulator

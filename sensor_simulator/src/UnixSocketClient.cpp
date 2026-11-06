@@ -17,22 +17,31 @@ UnixSocketClient::~UnixSocketClient(){
 }
 
 bool UnixSocketClient::connect(){
-    close();
+    if(isConnected()){
+        return true;
+    }
 
-    m_socketFd =::socket(AF_UNIX, SOCK_STREAM, 0);
+    const auto now = std::chrono::steady_clock::now();
 
-    if (m_socketFd == -1){
+    // Do not attempt reconnection more than once every 2 seconds.
+    if (now < m_nextReconnectAttempt) {
         return false;
     }
+
+    m_nextReconnectAttempt = now + ReconnectInterval;
+
 
     sockaddr_un address{};
     address.sun_family = AF_UNIX;
 
-    if (m_socketPath.empty() ||
-        m_socketPath.size() >=
-            sizeof(address.sun_path))
-    {
-        close();
+    if (m_socketPath.empty() || m_socketPath.size() >= sizeof(address.sun_path))   {
+        return false;
+    }
+
+    const int socketFd =
+        ::socket(AF_UNIX, SOCK_STREAM, 0);
+
+    if (socketFd == -1) {
         return false;
     }
 
@@ -42,22 +51,23 @@ bool UnixSocketClient::connect(){
         m_socketPath.size() + 1);
 
     const int result =
-        ::connect(m_socketFd, reinterpret_cast<sockaddr*>(&address), sizeof(address));
+        ::connect(socketFd, reinterpret_cast<sockaddr*>(&address), sizeof(address));
 
     if (result == -1) {
-        close();
+        ::close(socketFd);
         return false;
     }
-
+    m_socketFd = socketFd;
     return true;
 }
 
 bool UnixSocketClient::sendMessage(std::string_view payload) {
-    if (!isConnected()) {
+
+    if (payload.empty() || payload.size() > std::numeric_limits<std::uint32_t>::max()) {
         return false;
     }
 
-    if (payload.empty() || payload.size() > std::numeric_limits<std::uint32_t>::max()) {
+     if (!isConnected() && !connect()) {
         return false;
     }
 
@@ -65,7 +75,21 @@ bool UnixSocketClient::sendMessage(std::string_view payload) {
 
     const std::uint32_t networkSize = htonl(size);
 
-    return sendAll(&networkSize, sizeof(networkSize)) && sendAll(payload.data(), payload.size());
+    if (!sendAll(
+            &networkSize,
+            sizeof(networkSize))) {
+        close();
+        return false;
+    }
+
+    if (!sendAll(
+            payload.data(),
+            payload.size())) {
+        close();
+        return false;
+    }
+
+    return true;
 }
 
 bool UnixSocketClient::sendAll(const void* data, std::size_t size)
@@ -76,29 +100,36 @@ bool UnixSocketClient::sendAll(const void* data, std::size_t size)
 
     while (totalSent < size){
         const ssize_t sent=::send(m_socketFd, bytes + totalSent, size - totalSent, MSG_NOSIGNAL);
+        
+        if (sent > 0) {
+            totalSent +=
+                static_cast<std::size_t>(sent);
 
-        if (sent == -1) {
-            if (errno == EINTR){
-              continue;
-            }
+            continue;
+        }
+
+       if (sent == -1 &&
+            errno == EINTR) {
+            continue;
+        }
 
         return false;
         }
 
-      if (sent == 0)  {
-        return false;
-        }
-
-      totalSent += static_cast<std::size_t>(sent);
-    }
+     
 
     return true;
 }
 
 void UnixSocketClient::close() noexcept
 {
-    if (m_socketFd != -1)
-    {
+    if (m_socketFd != -1)  {
+
+        ::shutdown(
+            m_socketFd,
+            SHUT_RDWR
+        );
+
         ::close(m_socketFd);
         m_socketFd = -1;
     }

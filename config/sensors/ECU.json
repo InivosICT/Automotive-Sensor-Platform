@@ -1,0 +1,13 @@
+{
+    "ecuSocketPath": "/tmp/ecu_processor.sock",
+    "allowedVehicleIds": [
+        "vehicle-001",
+        "vehicle-002"
+    ],
+    "allowedSensorTypes": [
+        "Climate",
+        "Speedometer",
+        "RPM"
+    ],
+    "allowedDeviationPercent": 10.0
+}

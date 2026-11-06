@@ -6,15 +6,15 @@
       "id": "temp_1",
       "type": "Climate",
       "periodSec": 2,
-      "minValue": 15.0,
-      "maxValue": 50.0
+      "minValue": 150.0,
+      "maxValue": 500.0
     },
     {
       "id": "speed_1",
       "type": "Speedometer",
       "periodSec": 10,
-      "minValue": 0.0,
-      "maxValue": 200.0
+      "minValue": 50.0,
+      "maxValue": 2000.0
     }
   ]
 }

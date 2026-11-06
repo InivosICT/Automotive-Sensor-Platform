@@ -43,37 +43,35 @@ int main(int argc, char* argv[]) {
              sensorThreads.emplace_back( [sensor = std::move(sensor), sensorConfig, socketPath = config.ecuSocketPath, &running, &outputMutex]() mutable
                 {
                     PayloadBuilder payloadBuilder;
-                    UnixSocketClient socketClient{
-                        socketPath
-                    };
+                    UnixSocketClient socketClient{socketPath};
 
-                if (!socketClient.connect()) {
-                    std::lock_guard<std::mutex> lock{outputMutex};
 
-                    std::cerr << "Failed to connect sensor "<< sensorConfig.id << " to " << socketPath << '\n';
-                    Logger::instance().error("Failed to connect sensor " + sensorConfig.id + " to " + socketPath);
-                    return;
-                }
+                while (running.load()) {
 
-                while (running.load())
-                    {
                         const SensorData data = sensor->sample();
 
                         const std::string payload =payloadBuilder.build(data);
 
-                         if (!socketClient.sendMessage(payload)){
-            
-                            std::lock_guard<std::mutex> lock{outputMutex};
-
-                            Logger::instance().error("Failed to send payload from sensor " + sensorConfig.id);
-                            break;
-        }
-
+                        const bool sent = socketClient.sendMessage(payload);
                         {
                             std::lock_guard<std::mutex> lock{outputMutex};
+                            if(sent){
+                                std::cout<<"Vehicle ID: "<< sensorConfig.vehicleId << ", Sensor ID: "<< data.sensorId<< ", type: "<< data.sensorType<< ", value: "<< data.value<< ", timestamp: "<< data.timestampMs<< '\n';
+                                Logger::instance().info("Vehicle ID: " + sensorConfig.vehicleId + ", Sensor ID: " + data.sensorId + ", type: " + data.sensorType + ", value: " + std::to_string(data.value) + ", timestamp: " + std::to_string(data.timestampMs));
+                            }
+                             else {
+                    std::cerr
+                        << "ECU unavailable; sample dropped"
+                        << ", sensor="
+                        << sensorConfig.id
+                        << '\n';
 
-                            std::cout<<"Vehicle ID: "<< sensorConfig.vehicleId << ", Sensor ID: "<< data.sensorId<< ", type: "<< data.sensorType<< ", value: "<< data.value<< ", timestamp: "<< data.timestampMs<< '\n';
-                            Logger::instance().info("Vehicle ID: " + sensorConfig.vehicleId + ", Sensor ID: " + data.sensorId + ", type: " + data.sensorType + ", value: " + std::to_string(data.value) + ", timestamp: " + std::to_string(data.timestampMs));
+                    Logger::instance().warning(
+                        "ECU unavailable; sample dropped, sensor=" +
+                        sensorConfig.id
+                    );
+                }
+                            
                         }
 
                         std::this_thread::sleep_for(std::chrono::seconds{sensorConfig.periodSec});
